@@ -8,7 +8,19 @@ class App extends React.Component {
         this.state = {}
     }
 
+    async sendPostIPARequest(personInfo, url) {
+        return (await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: (JSON.stringify(personInfo))
+        })).json();
+    };
+
+
     render() {
+
         return (<div>
                 afew;slfw
             </div>
