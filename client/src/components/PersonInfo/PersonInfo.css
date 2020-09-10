@@ -1,0 +1,25 @@
+.information {
+    color: #0d0d0d;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    min-height: 100%;
+    padding: 20px;
+
+}
+
+.button_padding {
+    padding: 10px;
+    float: right;
+}
+
+.margin_text {
+    margin-top: 1em
+}
+
+.card_text{
+    display: flex;
+    align-items: center;
+}
