@@ -1,6 +1,6 @@
 import React from 'react';
 import "./PersonInfo.css"
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 import {Link} from "react-router-dom";
 
 class PersonInfo extends React.Component {

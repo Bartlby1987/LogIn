@@ -6,6 +6,7 @@ const authorization = require("../authorization/authorization")
 const TokenGenerator = require('uuid-token-generator');
 router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
+
 router.post('/registration', function (req, res) {
     let userInfo = req.body;
     let statusResponse = dataBase.addUserRegistrationInformation(userInfo);
@@ -32,7 +33,7 @@ router.post('/authorization', function (req, res) {
 
     let token = generateToken();
     let authorizationPersonInfo = authorization.authorizeUser(loginPassword, token);
-    res.setHeader(`Set-Cookie`, `SESSION_ID=1; HttpOnly; Path=/`)
+    res.setHeader(`Set-Cookie`, `SESSION_ID=${token}; HttpOnly; Path=/`)
     res.send(JSON.stringify(authorizationPersonInfo));
 });
 
@@ -40,7 +41,6 @@ router.post('/personInfo', function (req, res) {
     let userInfo = authorization.getProfileInfo(req.cookies.SESSION_ID)
     res.send(JSON.stringify(userInfo));
 });
-
 
 router.post('/logOut', function (req, res) {
     authorization.logOutFromSession()
