@@ -21,8 +21,8 @@ router.post('/authorization', async function (req, res) {
     let loginPassword = req.body;
     try {
         let authorizationPersonInfo = await authorization.authorizeUser(loginPassword);
-         res.setHeader(`Set-Cookie`, `SESSION_ID=${authorizationPersonInfo["id"]}; HttpOnly; Path=/`)
-        res.json(authorizationPersonInfo);
+         res.setHeader(`Set-Cookie`, `SESSION_ID=${authorizationPersonInfo["sessionId"]}; HttpOnly; Path=/`)
+        res.send(JSON.stringify(authorizationPersonInfo));
     } catch (err) {
         res.send(err)
     }
@@ -31,9 +31,14 @@ router.post('/authorization', async function (req, res) {
 
 
 
-router.post('/personInfo', function (req, res) {
-    let userInfo = authorization.getProfileInfo(req.cookies.SESSION_ID)
-    res.send(JSON.stringify(userInfo));
+router.post('/personInfo', async function (req, res) {
+    try {
+        let token=req.cookies.SESSION_ID;
+        let userInfo = await authorization.getProfileInfo(token)
+        res.send(JSON.stringify(userInfo));
+    } catch (err) {
+        res.send(err)
+    }
 });
 
 router.post('/logOut', function (req, res) {

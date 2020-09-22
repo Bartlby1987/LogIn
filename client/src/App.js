@@ -18,7 +18,24 @@ class App extends React.Component {
             personAuthorizationInfo: "",
             errorAuthorization: ""
         }
+
     };
+
+    componentDidMount() {
+        let promise = this.sendRequest(null, '/checkSession', 'GET');
+        promise.then(value => {
+            console.log(value)
+            if (value.ok)
+                this.setState({personAuthorizationInfo: value});
+            else {
+               console.log('error ' + value.status)
+            }
+        }).catch(reason => {
+            // redirectToLoginPage();
+            console.log('redirectToLoginPage();');
+            console.log(reason);
+        })
+    }
 
     closeRegistrationPopup() {
         this.setState({"statusRegistration": ""})
@@ -41,6 +58,19 @@ class App extends React.Component {
             return
         }
         return await response.json();
+    };
+    sendRequest = async (data, url, method) => {
+        let obj = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+        if (data) {
+            obj.body =JSON.stringify(data)
+        }
+
+        return fetch(url, obj);
     };
 
     async sendingUserRegistrationInformation(userInfo) {

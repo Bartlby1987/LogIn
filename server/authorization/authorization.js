@@ -5,6 +5,7 @@ const TokenGenerator = require('uuid-token-generator');
 const tokenObj = new TokenGenerator(256, TokenGenerator.BASE62);
 const statusResponse = {
     personNotExisted: {"401 Unauthorized": "Wrong password or login."},
+    internalError: {"500 Unauthorized": " Internal Server Error."},
 }
 async function execAsync(sql, params) {
     params = params ? params : [];
@@ -54,17 +55,30 @@ async function authorizeUser(loginPassword) {
                 await execAsync("INSERT INTO usersSession (sessionId,name,email,login,password,profileInfo) " +
                     " VALUES (?,?,?,?,?,?)", params);
                 resolve({
-                    id: token,
-                    name:userInfo["name"],
-                    email:userInfo["email"],
-                    login:userInfo["login"]
+                    sessionId: token,
+                    name: userInfo["name"],
+                    email: userInfo["email"],
+                    login: userInfo["login"]
                 })
             }
         } catch (error) {
-            reject("technical issue");
+            reject(statusResponse.internalError);
         }
-    }
+        }
     )
+}
+
+async function getProfileInfo(token) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let sqlPersonInfo = `SELECT * FROM usersSession WHERE sessionId='${token}'`;
+            let sessionId = await execAsync(sqlPersonInfo);
+            resolve(sessionId[0]);
+        } catch (err) {
+            reject(statusResponse.internalError);
+        }
+    });
+
 }
 
 // const deleteKeyFromObj = (object, keysArray) => {
@@ -106,8 +120,8 @@ async function authorizeUser(loginPassword) {
 // }
 
 module.exports = {
-    authorizeUser: authorizeUser
-    // getProfileInfo: getProfileInfo,
+    authorizeUser: authorizeUser,
+    getProfileInfo: getProfileInfo
     // getSessionValue: getSessionValue,
     // logOutFromSession: logOutFromSession
 }
