@@ -21,12 +21,14 @@ router.post('/authorization', async function (req, res) {
     let loginPassword = req.body;
     try {
         let authorizationPersonInfo = await authorization.authorizeUser(loginPassword);
-        res.setHeader(`Set-Cookie`, `SESSION_ID=${authorizationPersonInfo["token"]}; HttpOnly; Path=/`)
-        res.send(JSON.stringify(authorizationPersonInfo["responseObj"]));
+         res.setHeader(`Set-Cookie`, `SESSION_ID=${authorizationPersonInfo["id"]}; HttpOnly; Path=/`)
+        res.json(authorizationPersonInfo);
     } catch (err) {
         res.send(err)
     }
 });
+
+
 
 
 router.post('/personInfo', function (req, res) {

@@ -26,11 +26,17 @@ async function execAsync(sql, params) {
 async function authorizeUser(loginPassword) {
     return new Promise(async (resolve, reject) => {
         try {
-            let hashPassword =crypto.createHash('md5').update(loginPassword["password"]).digest('hex');
+            let createSessionTableSql = "CREATE TABLE IF NOT EXISTS usersSession (sessionId TEXT NOT NULL ," +
+                "name TEXT NOT NULL,email TEXT NOT NULL UNIQUE, login TEXT NOT NULL UNIQUE ,password TEXT NOT NULL," +
+                "profileInfo TEXT NOT NULL)";
+            await execAsync(createSessionTableSql);
 
-            let sqlExistedUser = `SELECT login, password FROM users WHERE login='${loginPassword["login"]}' AND ` +
+            let hashPassword = crypto.createHash('md5').update(loginPassword["password"]).digest('hex');
+
+            let sqlExistedUser = `SELECT * FROM users WHERE login='${loginPassword["login"]}' AND ` +
                 `password='${hashPassword}'`;
             let existedUser = await execAsync(sqlExistedUser);
+
             if (!existedUser || existedUser.length === 0) {
                 reject(statusResponse.personNotExisted)
             } else {
@@ -45,18 +51,18 @@ async function authorizeUser(loginPassword) {
                         break;
                     }
                 }
-                let sqlSessionUserData = `SELECT * FROM users WHERE login='${loginPassword["login"]}' AND ` +
-                    `password='${hashPassword}'`;
-                let sessionUserData = await execAsync(sqlSessionUserData);
-                let createSessionTableSql = "CREATE TABLE IF NOT EXISTS usersSession (sessionId TEXT NOT NULL ," +
-                    "name TEXT NOT NULL,email TEXT NOT NULL UNIQUE, login TEXT NOT NULL UNIQUE ,password TEXT NOT NULL," +
-                    "profileInfo TEXT NOT NULL)";
-                await execAsync(createSessionTableSql);
-                let params = [token, sessionUserData["name"], sessionUserData["email"],
-                    sessionUserData["login"], sessionUserData["password"], sessionUserData["profileInfo"]]
-                await execAsync("INSERT INTO usersSession VALUES (?,?,?,?,?,?)", params);
-                let sqUserData = `SELECT sessionId,name,login,email  FROM usersSession WHERE sessionId='${token}'`;
-                resolve(await execAsync(sqUserData))
+
+                let userInfo = existedUser[0];
+                let params = [token, userInfo["name"], userInfo["email"],
+                    userInfo["login"], userInfo["password"], userInfo["profileInfo"]]
+                await execAsync("INSERT INTO usersSession (sessionId,name,email,login,password,profileInfo) " +
+                    " VALUES (?,?,?,?,?,?)", params);
+                resolve({
+                    id: token,
+                    name:userInfo["name"],
+                    email:userInfo["email"],
+                    login:userInfo["login"]
+                })
             }
         } catch (error) {
             reject("technical issue");
