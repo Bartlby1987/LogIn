@@ -1,9 +1,3 @@
-// const fs = require("fs");
-// const badResponse = {"401 Unauthorized": "Wrong password or login."}
-// const crypto = require('crypto');
-// let session = {}
-
-
 const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('db.sqlite3');
@@ -11,6 +5,10 @@ const notNeedInfoKey = ["password", "profileInfo"];
 const TokenGenerator = require('uuid-token-generator');
 const tokenObj = new TokenGenerator(256, TokenGenerator.BASE62);
 
+
+const statusResponse = {
+    personNotExisted: {"40 Unauthorized": "Wrong password or login."},
+}
 
 async function execAsync(sql, params) {
     params = params ? params : [];
@@ -26,51 +24,64 @@ async function execAsync(sql, params) {
 }
 
 
-function generateToken(sessionTokens) {
-    if (sessionTokens.length === 0) {
-        return token
-    }
-    for (let i = 0; i < sessionTokens.length; i++) {
-        if (sessionTokens[i] !== token) {
-            return token
-        }
-    }
-    generateToken()
-}
+// function generateToken(sessionTokens) {
+//     if (sessionTokens.length === 0) {
+//         return token
+//     }
+//     for (let i = 0; i < sessionTokens.length; i++) {
+//         if (sessionTokens[i] !== token) {
+//             return token
+//         }
+//     }
+//     generateToken()
+// }
 
 
 async function authorizeUser(loginPassword) {
     return new Promise(async (resolve, reject) => {
-        let sqlExistedUser = `SELECT login, password FROM users WHERE login='${loginPassword["login"]}' AND ` +
-            `password='${loginPassword["password"]}'`;
+
         try {
+            let hashPassword =crypto.createHash('md5').update(loginPassword["password"]).digest('hex');
+
+            let sqlExistedUser = `SELECT login, password FROM users WHERE login='${loginPassword["login"]}' AND ` +
+                `password='${hashPassword}'`;
             let existedUser = await execAsync(sqlExistedUser);
-            if (existedUser || existedUser.length !== 0) {
-                resolve(statusResponse.successful)
+            if (!existedUser || existedUser.length === 0) {
+                reject(statusResponse.personNotExisted)
+            } else {
+                let i = 0;
+                let token;
+                while (true) {
+                    i++;
+                    token = tokenObj.generate();
+                    let sqlExistedSessionWithToken = `SELECT sessionId FROM usersSession WHERE sessionId='${token}'`;
+                    let sessionId = await execAsync(sqlExistedSessionWithToken);
+                    if (!sessionId || sessionId.length === 0) {
+                        break;
+                    }
+                }
+                let sqlSessionUserData = `SELECT * FROM users WHERE login='${loginPassword["login"]}' AND ` +
+                    `password='${hashPassword}'`;
+                let sessionUserData = await execAsync(sqlSessionUserData);
+                let createSessionTableSql = "CREATE TABLE IF NOT EXISTS usersSession (sessionId TEXT NOT NULL ," +
+                    "name TEXT NOT NULL,email TEXT NOT NULL UNIQUE, login TEXT NOT NULL UNIQUE ,password TEXT NOT NULL," +
+                    "profileInfo TEXT NOT NULL)";
+                await execAsync(createSessionTableSql);
+                let params = [token, sessionUserData["name"], sessionUserData["email"],
+                    sessionUserData["login"], sessionUserData["password"], sessionUserData["profileInfo"]]
+                await execAsync("INSERT INTO usersSession VALUES (?,?,?,?,?,?)", params);
+
+
             }
-            reject(statusResponse.loginUsed)
+
 
             // let params = [registrationData["name"], registrationData["email"],
             //     registrationData["login"], hashPassword(registrationData["password"]), registrationData["profileInfo"]];
             // await execAsync("INSERT INTO users VALUES (?,?,?,?,?)", params);
-
-
+        } catch (error) {
+            reject("technical issue");
         }
-    else
-        {
-
-        }
-
     }
-catch
-    (error)
-    {
-        reject("technical issue");
-    }
-
-
-}
-
 )
 }
 
