@@ -1,15 +1,11 @@
 const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('db.sqlite3');
-// const notNeedInfoKey = ["password", "profileInfo"];
 const TokenGenerator = require('uuid-token-generator');
 const tokenObj = new TokenGenerator(256, TokenGenerator.BASE62);
-
-
 const statusResponse = {
-    personNotExisted: {"40 Unauthorized": "Wrong password or login."},
+    personNotExisted: {"401 Unauthorized": "Wrong password or login."},
 }
-
 async function execAsync(sql, params) {
     params = params ? params : [];
     return new Promise((resolve, reject) => {
