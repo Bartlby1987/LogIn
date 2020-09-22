@@ -3,39 +3,31 @@ const router = express.Router();
 const bodyParser = require("body-parser");
 const dataBase = require("../registration-database/registration-database");
 const authorization = require("../authorization/authorization")
-const TokenGenerator = require('uuid-token-generator');
 router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
-router.post('/registration', function (req, res) {
+router.post('/registration', async function (req, res) {
     let userInfo = req.body;
-    let statusResponse = dataBase.addUserRegistrationInformation(userInfo);
-    res.send(statusResponse);
-});
-
-router.post('/authorization', function (req, res) {
-    let loginPassword = req.body;
-    const tokenObj = new TokenGenerator(256, TokenGenerator.BASE62);
-
-    function generateToken() {
-        let sessionTokens = authorization.getSessionValue();
-        let token = tokenObj.generate();
-        if (sessionTokens.length === 0) {
-            return token
-        }
-        for (let i = 0; i < sessionTokens.length; i++) {
-            if (sessionTokens[i] !== token) {
-                return token
-            }
-        }
-        generateToken()
+    try {
+        let msg = await dataBase.addUserRegistrationInformation(userInfo);
+        res.send(msg)
+    } catch (error) {
+        res.send(error)
     }
 
-    let token = generateToken();
-    let authorizationPersonInfo = authorization.authorizeUser(loginPassword, token);
-    res.setHeader(`Set-Cookie`, `SESSION_ID=${token}; HttpOnly; Path=/`)
-    res.send(JSON.stringify(authorizationPersonInfo));
 });
+
+router.post('/authorization', async function (req, res) {
+    let loginPassword = req.body;
+    try {
+        let authorizationPersonInfo = await authorization.authorizeUser(loginPassword);
+        res.setHeader(`Set-Cookie`, `SESSION_ID=${authorizationPersonInfo["token"]}; HttpOnly; Path=/`)
+        res.send(JSON.stringify(authorizationPersonInfo["responseObj"]));
+    } catch (err) {
+        res.send(err)
+    }
+});
+
 
 router.post('/personInfo', function (req, res) {
     let userInfo = authorization.getProfileInfo(req.cookies.SESSION_ID)
