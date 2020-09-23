@@ -21,20 +21,35 @@ class App extends React.Component {
 
     };
 
-    componentDidMount() {
-        let promise = this.sendRequest(null, '/checkSession', 'GET');
-        promise.then(value => {
-            console.log(value)
-            if (value.ok)
-                this.setState({personAuthorizationInfo: value});
-            else {
-               console.log('error ' + value.status)
+    // componentDidMount() {
+    //     let promise = this.sendRequest(null, '/checkSession', 'GET');
+    //     promise.then(value => {
+    //         console.log(value)
+    //         if (value.ok)
+    //             this.setState({personAuthorizationInfo: value});
+    //         else {
+    //            console.log('error ' + value.status)
+    //         }
+    //     }).catch(reason => {
+    //         // redirectToLoginPage();
+    //         console.log('redirectToLoginPage();');
+    //         console.log(reason);
+    //     })
+    // }
+
+    async componentDidMount() {
+        try {
+            let promise = await this.sendRequest(null, 'main/checkSession', 'GET');
+            if (promise.ok) {
+                this.setState({personAuthorizationInfo: promise})
+            } else {
+                console.log('error ' + promise.status)
             }
-        }).catch(reason => {
+        } catch (err) {
             // redirectToLoginPage();
             console.log('redirectToLoginPage();');
-            console.log(reason);
-        })
+            console.log(err);
+        }
     }
 
     closeRegistrationPopup() {

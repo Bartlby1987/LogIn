@@ -14,7 +14,6 @@ router.post('/registration', async function (req, res) {
     } catch (error) {
         res.send(error)
     }
-
 });
 
 router.post('/authorization', async function (req, res) {
@@ -28,9 +27,6 @@ router.post('/authorization', async function (req, res) {
     }
 });
 
-
-
-
 router.post('/personInfo', async function (req, res) {
     try {
         let token=req.cookies.SESSION_ID;
@@ -41,12 +37,17 @@ router.post('/personInfo', async function (req, res) {
     }
 });
 
-router.post('/logOut', function (req, res) {
-    authorization.logOutFromSession()
-    req.session = null
-    res.clearCookie("SESSION_ID", {path: '/'})
-    res.status(200).json('User Logged out')
+router.post('/logOut', async function (req, res) {
+    try {
+        let token = req.cookies.SESSION_ID;
+        await authorization.logOutFromSession(token)
+        req.session = null
+        res.clearCookie("SESSION_ID", {path: '/'})
+        res.status(200).json('User Logged out')
+        res.send()
+    } catch (err) {
+        res.send(err)
+    }
 });
-
 
 module.exports = router;

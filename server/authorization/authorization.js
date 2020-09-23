@@ -78,8 +78,19 @@ async function getProfileInfo(token) {
             reject(statusResponse.internalError);
         }
     });
-
 }
+
+async function logOutFromSession(token) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let sqlDeleteSession = `DELETE FROM  usersSession   WHERE sessionId='${token}'`;
+            await execAsync(sqlDeleteSession);
+        } catch (err) {
+            reject(statusResponse.internalError);
+        }
+    })
+}
+
 
 // const deleteKeyFromObj = (object, keysArray) => {
 //     for (let i = 0; i < keysArray.length; i++) {
@@ -92,9 +103,7 @@ async function getProfileInfo(token) {
 //     return Object.keys(session)
 // }
 //
-// function logOutFromSession() {
-//     session = {};
-// }
+
 
 // function authorizeUser(loginPassword, token) {
 //     let personsInfo = fs.readFileSync("registration-database/database.json", "utf8");
@@ -121,7 +130,7 @@ async function getProfileInfo(token) {
 
 module.exports = {
     authorizeUser: authorizeUser,
-    getProfileInfo: getProfileInfo
+    getProfileInfo: getProfileInfo,
     // getSessionValue: getSessionValue,
-    // logOutFromSession: logOutFromSession
+    logOutFromSession: logOutFromSession
 }
