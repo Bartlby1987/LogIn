@@ -29,7 +29,7 @@ class PersonInfo extends React.Component {
                                 {`Login : ${personAuthorizationInfo.login}`}
                             </p>
                             <p className="card-text">
-                                {`Id : ${personAuthorizationInfo.id}`}
+                                {`Id : ${personAuthorizationInfo.sessionId}`}
                             </p>
                             <p className="card-text">
                                 {` Email : ${personAuthorizationInfo.email}`}
