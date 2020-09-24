@@ -27,13 +27,17 @@ async function authorizeUser(loginPassword) {
                 "name TEXT NOT NULL,email TEXT NOT NULL UNIQUE, login TEXT NOT NULL UNIQUE ,password TEXT NOT NULL," +
                 "profileInfo TEXT NOT NULL)";
             await execAsync(createSessionTableSql);
-
+            let login = loginPassword["login"];
+            let sessionExistSql = `SELECT login FROM usersSession WHERE login='${login}'`;
+            let existSession = await execAsync(sessionExistSql);
+            if (existSession || existSession.length !== 0) {
+                let sqlDeleteSession = `DELETE FROM  usersSession   WHERE login='${login}'`;
+                await execAsync(sqlDeleteSession);
+            }
             let hashPassword = crypto.createHash('md5').update(loginPassword["password"]).digest('hex');
-
             let sqlExistedUser = `SELECT * FROM users WHERE login='${loginPassword["login"]}' AND ` +
                 `password='${hashPassword}'`;
             let existedUser = await execAsync(sqlExistedUser);
-
             if (!existedUser || existedUser.length === 0) {
                 reject(statusResponse.personNotExisted)
             } else {
@@ -48,7 +52,6 @@ async function authorizeUser(loginPassword) {
                         break;
                     }
                 }
-
                 let userInfo = existedUser[0];
                 let params = [token, userInfo["name"], userInfo["email"],
                     userInfo["login"], userInfo["password"], userInfo["profileInfo"]]
@@ -67,7 +70,6 @@ async function authorizeUser(loginPassword) {
         }
     )
 }
-
 async function getProfileInfo(token) {
     return new Promise(async (resolve, reject) => {
         try {

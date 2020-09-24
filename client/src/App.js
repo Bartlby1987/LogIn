@@ -20,23 +20,6 @@ class App extends React.Component {
         }
 
     };
-
-    // componentDidMount() {
-    //     let promise = this.sendRequest(null, '/checkSession', 'GET');
-    //     promise.then(value => {
-    //         console.log(value)
-    //         if (value.ok)
-    //             this.setState({personAuthorizationInfo: value});
-    //         else {
-    //            console.log('error ' + value.status)
-    //         }
-    //     }).catch(reason => {
-    //         // redirectToLoginPage();
-    //         console.log('redirectToLoginPage();');
-    //         console.log(reason);
-    //     })
-    // }+
-
     async componentDidMount() {
         try {
             let promise = await this.sendRequest(null, 'main/checkSession', 'GET');
@@ -87,9 +70,7 @@ class App extends React.Component {
 
         let response = await fetch(url, obj);
 
-        let json = await response.json();
-
-        return json;
+        return await response.json();
     };
 
     async sendingUserRegistrationInformation(userInfo) {
