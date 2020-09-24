@@ -91,46 +91,24 @@ async function logOutFromSession(token) {
     })
 }
 
+async function checkSession(token) {
+    return new Promise(async (resolve, reject) => {
+        try {
 
-// const deleteKeyFromObj = (object, keysArray) => {
-//     for (let i = 0; i < keysArray.length; i++) {
-//         delete object[keysArray[i]]
-//     }
-//     return object
-// }
+            let sqlPersonInfo = `SELECT * FROM usersSession WHERE sessionId='${token}'`;
+            let sessionId = await execAsync(sqlPersonInfo);
+            resolve(sessionId[0]);
 
-// function getSessionValue() {
-//     return Object.keys(session)
-// }
-//
+        } catch (err) {
+            reject(statusResponse.internalError);
+        }
+    });
+}
 
-
-// function authorizeUser(loginPassword, token) {
-//     let personsInfo = fs.readFileSync("registration-database/database.json", "utf8");
-//     let personsInfoObj;
-//     let hashedPassword = crypto.createHash('md5').update(loginPassword["password"]).digest('hex');
-//     let login = loginPassword["login"];
-//     if (personsInfo === "") {
-//         return badResponse
-//     }
-//     personsInfoObj = JSON.parse(personsInfo);
-//     let mapPersonsInfoObj = new Map(Object.entries(personsInfoObj))
-//     for (let [, value] of mapPersonsInfoObj) {
-//         if (value.login === login && value.password === hashedPassword) {
-//             session[token] = JSON.parse(JSON.stringify(value))
-//             return deleteKeyFromObj(value, notNeedInfoKey)
-//         }
-//     }
-//     return badResponse
-// }
-//
-// function getProfileInfo(token) {
-//     return session[token]
-// }
 
 module.exports = {
     authorizeUser: authorizeUser,
     getProfileInfo: getProfileInfo,
-    // getSessionValue: getSessionValue,
+    checkSession: checkSession,
     logOutFromSession: logOutFromSession
 }

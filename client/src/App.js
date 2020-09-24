@@ -35,20 +35,20 @@ class App extends React.Component {
     //         console.log('redirectToLoginPage();');
     //         console.log(reason);
     //     })
-    // }
+    // }+
 
     async componentDidMount() {
         try {
             let promise = await this.sendRequest(null, 'main/checkSession', 'GET');
-            if (promise.ok) {
-                this.setState({personAuthorizationInfo: promise})
+            if ("name" in promise && "email" in promise && "login" in promise) {
+                this.setState({personAuthorizationInfo: promise}, () => {
+                    history.push('/personInfo')
+                })
             } else {
-                console.log('error ' + promise.status)
+                history.push('/')
             }
         } catch (err) {
-            // redirectToLoginPage();
-            console.log('redirectToLoginPage();');
-            console.log(err);
+            history.push('/')
         }
     }
 
@@ -85,7 +85,11 @@ class App extends React.Component {
             obj.body =JSON.stringify(data)
         }
 
-        return fetch(url, obj);
+        let response = await fetch(url, obj);
+
+        let json = await response.json();
+
+        return json;
     };
 
     async sendingUserRegistrationInformation(userInfo) {

@@ -40,11 +40,24 @@ router.post('/personInfo', async function (req, res) {
 router.post('/logOut', async function (req, res) {
     try {
         let token = req.cookies.SESSION_ID;
-        await authorization.logOutFromSession(token)
         req.session = null
-        res.clearCookie("SESSION_ID", {path: '/'})
+        res.clearCookie('SESSION_ID', { path: '/' })
         res.status(200).json('User Logged out')
+        await authorization.logOutFromSession(token);
         res.send()
+    } catch (err) {
+        res.send(err)
+    }
+});
+
+router.get('/checkSession', async function (req, res) {
+    try {
+        let token = req.cookies.SESSION_ID;
+        if (!token) {
+            res.send()
+        }
+        let sessionInfo = await authorization.checkSession(token);
+        res.send(sessionInfo)
     } catch (err) {
         res.send(err)
     }
